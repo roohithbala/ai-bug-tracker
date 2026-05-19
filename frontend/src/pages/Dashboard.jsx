@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './Dashboard.css'
 
+const API_URL = import.meta.env.VITE_API_URL || ''
+
 function Dashboard() {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -12,7 +14,7 @@ function Dashboard() {
 
   const fetchLogs = async () => {
     try {
-      const response = await axios.get('/api/logs')
+      const response = await axios.get(`${API_URL}/api/logs`)
       setLogs(response.data)
     } catch (error) {
       console.error('Failed to fetch logs:', error)

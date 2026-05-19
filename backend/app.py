@@ -13,13 +13,15 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# OpenRouter AI setup
-OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+# Groq AI setup
+GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 # Database setup
+DB_PATH = os.path.join('/tmp', 'logs.db') if os.environ.get('VERCEL') else 'logs.db'
+
 def init_db():
-    conn = sqlite3.connect('logs.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS logs (
         id INTEGER PRIMARY KEY,
@@ -606,7 +608,7 @@ def parse_log_errors(content):
 
 def analyze_errors_selectively(errors, removed_content):
     """Analyze only new errors, reuse existing analyses for known errors"""
-    conn = sqlite3.connect('logs.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
     new_errors = []
@@ -685,7 +687,7 @@ def analyze_errors_selectively(errors, removed_content):
     return None, [], 0, 0
 
 def analyze_log_with_ai(redacted_content):
-    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == 'your_openrouter_api_key_here':
+    if not GROQ_API_KEY or GROQ_API_KEY == 'your_groq_api_key_here':
         # Determine severity based on log content for mock analysis
         content_lower = redacted_content.lower()
         if 'error' in content_lower or 'exception' in content_lower or 'failed' in content_lower:
@@ -698,8 +700,8 @@ def analyze_log_with_ai(redacted_content):
         return {
             "issue_type": "Mock Analysis - API Key Not Configured",
             "severity": severity,
-            "root_cause": "This is a mock analysis because no OpenRouter API key is configured. Please set OPENROUTER_API_KEY in your .env file.",
-            "suggested_fix": "Configure your OpenRouter API key to enable real AI analysis."
+            "root_cause": "This is a mock analysis because no Groq API key is configured. Please set GROQ_API_KEY in your .env file.",
+            "suggested_fix": "Configure your Groq API key to enable real AI analysis."
         }
 
     # Build prompt
@@ -773,15 +775,13 @@ Return only the JSON object, no commentary.
         import ast
 
         resp = requests.post(
-            url=f"{OPENROUTER_BASE_URL}/chat/completions",
+            url=f"{GROQ_BASE_URL}/chat/completions",
             headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Referer": "https://github.com/your-repo/ai-bug-tracker",
-                "X-Title": "AI Bug Tracker",
+                "Authorization": f"Bearer {GROQ_API_KEY}",
                 "Content-Type": "application/json"
             },
             data=json.dumps({
-                "model": "openai/gpt-4o",
+                "model": "llama3-8b-8192",
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.1,
                 "max_tokens": 1000
@@ -914,15 +914,15 @@ Return only the JSON object, no commentary.
         }
 
     except requests.exceptions.RequestException as e:
-        error_msg = f"Failed to connect to OpenRouter API: {str(e)}"
+        error_msg = f"Failed to connect to Groq API: {str(e)}"
     except Exception as e:
-        error_msg = f"Failed to analyze log with OpenRouter: {str(e)}"
+        error_msg = f"Failed to analyze log with Groq: {str(e)}"
 
     return {
         "issue_type": "Analysis Failed",
         "severity": "Unknown",
         "root_cause": error_msg,
-        "suggested_fix": "Please check your OpenRouter API key and try again."
+        "suggested_fix": "Please check your Groq API key and try again."
     }
 
 
@@ -946,7 +946,7 @@ def upload_log():
     file_hash = hashlib.sha256(content.encode()).hexdigest()
     
     # Check for exact duplicate first
-    conn = sqlite3.connect('logs.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('SELECT * FROM logs WHERE hash = ?', (file_hash,))
     existing = c.fetchone()
@@ -1039,7 +1039,7 @@ def upload_log():
 
 @app.route('/api/logs', methods=['GET'])
 def get_logs():
-    conn = sqlite3.connect('logs.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('SELECT id, filename, file_size, issue_type, severity, root_cause, suggested_fix, upload_time, status FROM logs ORDER BY upload_time DESC')
     logs = c.fetchall()

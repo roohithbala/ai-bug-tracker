@@ -2,6 +2,8 @@ import { useState } from 'react'
 import axios from 'axios'
 import './UploadPage.css'
 
+const API_URL = import.meta.env.VITE_API_URL || ''
+
 function UploadPage() {
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState('')
@@ -50,7 +52,7 @@ function UploadPage() {
     formData.append('log_file', file)
 
     try {
-      const response = await axios.post('/api/upload', formData, {
+      const response = await axios.post(`${API_URL}/api/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
