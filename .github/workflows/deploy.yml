@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy.yml'
 
 permissions:
   contents: write
@@ -39,25 +42,3 @@ jobs:
         with:
           folder: frontend/dist
           branch: gh-pages
-
-  deploy-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel
-
-      - name: Set Groq API Key and Deploy to Vercel
-        env:
-          VERCEL_ORG_ID: 'team_4R3M4uG14aZNV7705vW9dckY'
-          VERCEL_PROJECT_ID: 'prj_F9Nl2sLJgAOM5lJgIbAKih3yR0we'
-        run: |
-          # Pull project settings to link the workspace on the runner
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_API_KEY }}
-          # Configure the Groq API key in Vercel project environment variables
-          vercel env rm GROQ_API_KEY production --token=${{ secrets.VERCEL_API_KEY }} --yes || true
-          vercel env add GROQ_API_KEY production "${{ secrets.GROQ_API }}" --token=${{ secrets.VERCEL_API_KEY }} --yes
-          # Deploy the project using Vercel CLI
-          vercel deploy --prod --token=${{ secrets.VERCEL_API_KEY }} --yes
