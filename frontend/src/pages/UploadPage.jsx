@@ -2,7 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import './UploadPage.css'
 
-const API_URL = import.meta.env.VITE_API_URL || ''
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://ai-bug-tracker-lac.vercel.app' : '')
 
 function UploadPage() {
   const [file, setFile] = useState(null)
