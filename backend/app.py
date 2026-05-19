@@ -926,6 +926,168 @@ Return only the JSON object, no commentary.
     }
 
 
+@app.route('/')
+def home():
+    html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Bug Tracker API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --border: #334155;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 90%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .description {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .endpoints-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .endpoints-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .endpoint-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+        .endpoint-path {
+            font-family: monospace;
+            font-size: 14px;
+            color: #93c5fd;
+        }
+        .method {
+            font-family: monospace;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .method.post {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+        .method.get {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Bug Tracker API</h1>
+            <div class="badge">
+                <span class="pulse"></span>
+                Operational
+            </div>
+        </div>
+        <p class="description">
+            This is the backend API service for the AI Bug Tracker. It handles secure log sanitization (PII redaction) and processes error logs using the Groq Llama 3 AI model.
+        </p>
+        <div class="endpoints-title">Available Endpoints</div>
+        <div class="endpoints-list">
+            <div class="endpoint-item">
+                <span class="endpoint-path">/api/upload</span>
+                <span class="method post">POST</span>
+            </div>
+            <div class="endpoint-item">
+                <span class="endpoint-path">/api/logs</span>
+                <span class="method get">GET</span>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; 2026 AI Bug Tracker. All services running normally.
+        </div>
+    </div>
+</body>
+</html>"""
+    return html_content
+
+
 @app.route('/api/upload', methods=['POST'])
 def upload_log():
     if 'log_file' not in request.files:
